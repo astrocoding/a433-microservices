@@ -1,10 +1,16 @@
 #!/bin/bash
 
+# Variabel untuk username dan token
+GITHUB_USERNAME=astrocoding
+
 # Build Docker image
-docker build -t astrocoding/karsajobs:latest .
+docker build -t ${GITHUB_USERNAME}/karsajobs:latest .
 
-# Login to GitHub Packages
-echo $GITHUB_TOKEN | docker login ghcr.io -u astrocoding --password-stdin
+# Login ke GitHub Container Registry
+echo $GHCR_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
 
-# Push Docker image
-docker push ghcr.io/astrocoding/karsajobs:latest
+# Tag Docker image
+docker tag ${GITHUB_USERNAME}/karsajobs:latest ghcr.io/${GITHUB_USERNAME}/karsajobs:latest
+
+# Push Docker image ke GitHub Container Registry
+docker push ghcr.io/${GITHUB_USERNAME}/karsajobs:latest
