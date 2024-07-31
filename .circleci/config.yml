@@ -1,0 +1,40 @@
+version: 2.1
+
+jobs:
+  lint-dockerfile:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: Install hadolint
+          command: |
+            curl -o /usr/local/bin/hadolint -L https://github.com/hadolint/hadolint/releases/download/v1.17.2/hadolint-Linux-x86_64
+            chmod +x /usr/local/bin/hadolint
+      - run:
+          name: Lint Dockerfile
+          command: hadolint Dockerfile
+
+  build-and-push-docker-image:
+    docker:
+      - image: circleci/python:3.8
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t ghcr.io/astrocoding/karsajobs:latest .
+      - run:
+          name: Push Docker image
+          command: |
+            echo $GITHUB_TOKEN | docker login ghcr.io -u astrocoding --password-stdin
+            docker push ghcr.io/astrocoding/karsajobs:latest
+
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - lint-dockerfile
+      - build-and-push-docker-image:
+          requires:
+            - lint-dockerfile
